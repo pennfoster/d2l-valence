@@ -5,7 +5,7 @@ module D2L
     class Response
       attr_reader :http_response
 
-      # @param [RestClient::Response] http_response response from a request against the Valance API
+      # @param [Net::HTTPResponse] http_response response from a request against the Valance API
       def initialize(http_response)
         @http_response = http_response
         @server_skew = 0
