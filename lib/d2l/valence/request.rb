@@ -122,10 +122,7 @@ module D2L
       end
 
       def add_params_to_url(url, hash = {})
-        byebug
-        binding.pry
-
-        _uri = url.class == 'URI' ? url : URI(url)
+        _uri = ['URI::HTTP', 'URI:HTTPS'].include? url.class ? url : URI(url)
         _params = URI.decode_www_form(_uri.query || '').to_h
         hash.each do |k, v|
           if !k.nil? && !v.nil?
