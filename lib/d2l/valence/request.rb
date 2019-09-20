@@ -113,7 +113,7 @@ module D2L
           end
           if headers
             request.each_header {|k, v| request.delete(k)}
-            headers.each {|k, v| headers[k] = v}
+            headers.each {|k, v| request[k] = v}
           end
           if content_type
             request.content_type = content_type
