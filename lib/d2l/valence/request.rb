@@ -46,7 +46,6 @@ module D2L
       # @return [D2L::Valence::Response] URI for the authenticated methof call
       def execute
         raise "HTTP Method #{@http_method} is not implemented" if params.nil?
-
         @response = execute_call
         @user_context.server_skew = @response.server_skew
         @response
@@ -67,8 +66,8 @@ module D2L
 
       def execute_call
         Response.new send_request(@http_method.downcase, *params)
-      rescue RestClient::Exception => e
-        Response.new e.response
+      rescue Exception => e
+        Response.new e.respond_to?(:response) ? e.response : e.message
       end
 
       def params
@@ -100,16 +99,21 @@ module D2L
       end
 
       def send_request(http_method, uri, headers, content_type, request_payload)
+        response = {}
         Net::HTTP.start(uri.host, uri.port, read_timeout: 20, use_ssl: uri.scheme == 'https') do |http|
           case http_method
           when 'post'
-            request = Net::HTTP::Post.new(uri.path, headers)
+            request = Net::HTTP::Post.new(uri.path)
           when 'get'
-            request = Net::HTTP::Get.new(uri.request_uri, headers)
+            request = Net::HTTP::Get.new(uri.request_uri)
           when 'put'
-            request = Net::HTTP::Put.new(uri.request_uri, headers)
+            request = Net::HTTP::Put.new(uri.request_uri)
           else
             raise "Invalid HTTP method: #{http_method}"
+          end
+          if headers
+            request.each_header {|k, v| request.delete(k)}
+            headers.each {|k, v| headers[k] = v}
           end
           if content_type
             request.content_type = content_type
@@ -117,12 +121,13 @@ module D2L
           if request_payload
             request.body = request_payload
           end
-          http.request(request)
+          response = http.request(request)
         end
+        response
       end
 
       def add_params_to_url(url, hash = {})
-        _uri = ['URI::HTTP', 'URI:HTTPS'].include? url.class ? url : URI(url)
+        _uri = [URI::HTTP, URI::HTTPS].include?(url.class) ? url : URI(url)
         _params = URI.decode_www_form(_uri.query || '').to_h
         hash.each do |k, v|
           if !k.nil? && !v.nil?
