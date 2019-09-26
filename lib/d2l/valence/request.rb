@@ -75,7 +75,7 @@ module D2L
       end
 
       def substitute_keys_with(params)
-        params.each {|param, value| @route.gsub!(":#{param}", value.to_s)}
+        params.each {|param, value| @route = @route.gsub(":#{param}", value.to_s)}
       end
 
       def known_params
