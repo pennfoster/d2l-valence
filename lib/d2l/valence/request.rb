@@ -103,7 +103,7 @@ module D2L
         Net::HTTP.start(uri.host, uri.port, read_timeout: 20, use_ssl: uri.scheme == 'https') do |http|
           case http_method
           when 'post'
-            request = Net::HTTP::Post.new(uri.path)
+            request = Net::HTTP::Post.new(uri.request_uri)
           when 'get'
             request = Net::HTTP::Get.new(uri.request_uri)
           when 'put'
