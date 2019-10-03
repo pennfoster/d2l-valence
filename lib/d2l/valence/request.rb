@@ -129,9 +129,11 @@ module D2L
       def add_params_to_url(url, hash = {})
         _uri = [URI::HTTP, URI::HTTPS].include?(url.class) ? url : URI(url)
         _params = URI.decode_www_form(_uri.query || '').to_h
-        hash.each do |k, v|
-          if !k.nil? && !v.nil?
-            _params[k.to_s] = v
+        if hash
+          hash.each do |k, v|
+            if !k.nil? && !v.nil?
+              _params[k.to_s] = v
+            end
           end
         end
         _uri.query = URI.encode_www_form(_params)
